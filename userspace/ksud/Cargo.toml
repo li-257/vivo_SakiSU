@@ -53,7 +53,7 @@ getopts = "0.2"
 serde = { version = "1.0", features = ["derive"] }
 ksuinit = { path = "../ksuinit" }
 adb_client = { git = "https://github.com/ReSukiSU/adb_client" }
-prop-rs-android = { git = "https://github.com/ReSukiSU/ksu_props", rev = "ddb6ee7294467f7f25bad2118e9e24eee104144b" }
+prop-rs-android = { git = "https://github.com/ReSukiSU/ksu_props" }
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
 env_logger = { version = "0.11.10", default-features = false }
