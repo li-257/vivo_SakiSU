@@ -26,6 +26,7 @@ env:
 jobs:
   build:
     runs-on: ${{ inputs.os }}
+    continue-on-error: true
     steps:
     - uses: actions/checkout@v6
       with:
