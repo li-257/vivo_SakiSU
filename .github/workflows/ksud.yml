@@ -60,6 +60,37 @@ jobs:
     - name: Setup cargo-ndk
       run: cargo install cargo-ndk --locked
         
+    - name: Patch ksud source for public ksu_props API
+      run: |
+        python3 - <<'PY'
+        import pathlib
+        root = pathlib.Path('userspace/ksud/src/android')
+        patched = []
+        def patch(name, pairs, guard='rebuild: false'):
+            p = root / name
+            s = p.read_text()
+            if guard in s:
+                print(f'skip {name}: already patched'); return
+            for old, new in pairs:
+                if old not in s:
+                    print(f'!! MISSING pattern in {name}: {old[:70]!r}')
+                s = s.replace(old, new)
+            p.write_text(s); patched.append(name)
+        patch('resetprop.rs', [
+            ('show_context: cli.show_context,\n    };', 'show_context: cli.show_context,\n        rebuild: false,\n    };'),
+            ('show_context: false,\n    };', 'show_context: false,\n        rebuild: false,\n    };'),
+            ('        let context = cli.name().map(std::string::String::as_str);\n        let compacted = sys_prop::compact(context).context("compact failed")?;\n        if !compacted {\n            bail!("nothing to compact");\n        }\n        return Ok(());',
+             '        let ctx = cli.name().unwrap_or_default().to_string();\n        sys_prop::rebuild(&ctx, false, false).context("rebuild failed")?;\n        return Ok(());'),
+        ])
+        patch('magica.rs', [
+            ('show_context: false,\n    }', 'show_context: false,\n        rebuild: false,\n    }'),
+            ('let _ = sys_prop::compact(Some(&ctx));', 'let _ = sys_prop::rebuild(&ctx, false, false);'),
+        ])
+        patch('init_event.rs', [
+            ('show_context: false,\n    }', 'show_context: false,\n        rebuild: false,\n    }'),
+        ])
+        print('patched files:', patched)
+        PY
     - name: Build ksud
       run: |
         cd userspace/ksud/
