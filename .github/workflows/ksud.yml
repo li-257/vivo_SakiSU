@@ -86,6 +86,12 @@ jobs:
             ('show_context: false,\n    }', 'show_context: false,\n        rebuild: false,\n    }'),
             ('let _ = sys_prop::compact(Some(&ctx));', 'let _ = sys_prop::rebuild(&ctx, false, false);'),
         ])
+        # rename module in ksud unload path to match vivo_pm_mgr
+        p = pathlib.Path('userspace/ksud/src/android/unload.rs')
+        s = p.read_text()
+        s = s.replace('delete_module(c"kernelsu", 0)', 'delete_module(c"vivo_pm_mgr", 0)')
+        p.write_text(s)
+        print('patched unload.rs')
         patch('init_event.rs', [
             ('show_context: false,\n    }', 'show_context: false,\n        rebuild: false,\n    }'),
         ])
