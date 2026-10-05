@@ -131,9 +131,13 @@ jobs:
         fi
 
         # --- rename KernelSU module to avoid detector signatures (vivo_pm_mgr) ---
-        sed -i 's/\bkernelsu-objs\b/vivo_pm_mgr-objs/g' kernel/Kbuild
+        sed -i 's/obj-\$(CONFIG_KSU) += kernelsu\.o/obj-$(CONFIG_KSU) += vivo_pm_mgr.o/' kernel/Kbuild
+        sed -i 's/kernelsu-objs/vivo_pm_mgr-objs/g' kernel/Kbuild
         sed -i 's/check_symbol kernelsu\.ko/check_symbol vivo_pm_mgr.ko/' kernel/Makefile
-        grep -n "vivo_pm_mgr-objs" kernel/Kbuild | head -3
+        echo "--- verify rename (fail fast if any is 0) ---"
+        grep -c "vivo_pm_mgr-objs" kernel/Kbuild
+        grep -n "obj-\$(CONFIG_KSU) += vivo_pm_mgr.o" kernel/Kbuild
+        grep -n "check_symbol" kernel/Makefile
         CONFIG_KSU=m CONFIG_KSU_MULTI_MANAGER_SUPPORT=y CONFIG_KSU_TRACEPOINT_HOOK=y CC=clang make $EXTRA_ARGS
         
         echo "=== Build completed ==="
@@ -145,7 +149,7 @@ jobs:
           SUFFIX="_vivo"
         fi
         OUTPUT_NAME="${{ inputs.kmi }}${SUFFIX}_kernelsu.ko"
-        cp kernelsu.ko "/github/workspace/out/$OUTPUT_NAME"
+        cp vivo_pm_mgr.ko "/github/workspace/out/$OUTPUT_NAME"
         
         echo "Copied to: /github/workspace/out/$OUTPUT_NAME"
         ls -la "/github/workspace/out/$OUTPUT_NAME"
