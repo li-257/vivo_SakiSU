@@ -131,13 +131,14 @@ jobs:
         fi
 
         # --- rename KernelSU module to avoid detector signatures (vivo_pm_mgr) ---
-        sed -i 's/obj-\$(CONFIG_KSU) += kernelsu\.o/obj-$(CONFIG_KSU) += vivo_pm_mgr.o/' kernel/Kbuild
-        sed -i 's/kernelsu-objs/vivo_pm_mgr-objs/g' kernel/Kbuild
-        sed -i 's/check_symbol kernelsu\.ko/check_symbol vivo_pm_mgr.ko/' kernel/Makefile
+        # NOTE: cwd is already kernel/ here (see "cd kernel" above), so paths are relative to it
+        sed -i 's/obj-\$(CONFIG_KSU) += kernelsu\.o/obj-$(CONFIG_KSU) += vivo_pm_mgr.o/' Kbuild
+        sed -i 's/kernelsu-objs/vivo_pm_mgr-objs/g' Kbuild
+        sed -i 's/check_symbol kernelsu\.ko/check_symbol vivo_pm_mgr.ko/' Makefile
         echo "--- verify rename (fail fast if any is 0) ---"
-        grep -c "vivo_pm_mgr-objs" kernel/Kbuild
-        grep -n "obj-\$(CONFIG_KSU) += vivo_pm_mgr.o" kernel/Kbuild
-        grep -n "check_symbol" kernel/Makefile
+        grep -c "vivo_pm_mgr-objs" Kbuild
+        grep -n "obj-\$(CONFIG_KSU) += vivo_pm_mgr.o" Kbuild
+        grep -n "check_symbol" Makefile
         CONFIG_KSU=m CONFIG_KSU_MULTI_MANAGER_SUPPORT=y CONFIG_KSU_TRACEPOINT_HOOK=y CC=clang make $EXTRA_ARGS
         
         echo "=== Build completed ==="
