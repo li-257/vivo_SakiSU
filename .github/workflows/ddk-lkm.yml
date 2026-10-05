@@ -130,6 +130,10 @@ jobs:
           EXTRA_ARGS="KSU_EXPECTED_PR_BUILD_SIZE=$EXPECTED_PR_BUILD_SIZE KSU_EXPECTED_PR_BUILD_HASH=$EXPECTED_PR_BUILD_HASH"
         fi
 
+        # --- rename KernelSU module to avoid detector signatures (vivo_pm_mgr) ---
+        sed -i 's/\bkernelsu-objs\b/vivo_pm_mgr-objs/g' kernel/Kbuild
+        sed -i 's/check_symbol kernelsu\.ko/check_symbol vivo_pm_mgr.ko/' kernel/Makefile
+        grep -n "vivo_pm_mgr-objs" kernel/Kbuild | head -3
         CONFIG_KSU=m CONFIG_KSU_MULTI_MANAGER_SUPPORT=y CONFIG_KSU_TRACEPOINT_HOOK=y CC=clang make $EXTRA_ARGS
         
         echo "=== Build completed ==="
